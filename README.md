@@ -8,7 +8,7 @@ I admit that I did not search too much on the net because in my opinion it was q
 
 
 
-I propose this base which can be adapted in other languages. I will make a PowerShell port.
+I propose this base which can be adapted in other languages. I will make a fork for PowerShell.
 
 You can use, modify, fork, ... This class as you like.
 
