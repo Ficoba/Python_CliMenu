@@ -16,7 +16,9 @@ If you have any code improvement tips please let me know I do not have a lot of 
 
 I am a bit of a dabbler in everything at one time I had a good experience in PHP, but I am a bit rusty since then :-D
 ## Requirement
+```python
 import sys
+```
 ## Compatibility
 Python 3.6 or greater
 
