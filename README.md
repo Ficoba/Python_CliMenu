@@ -107,8 +107,9 @@ print(mainMenu.getSelectedIndexes())
 ### getSelectedIndexes() method
 Return a list() containing at least one other list()
 Example of result of this method:
-> [[1, [0, 1, 2]], [2]]
-
+```
+[[1, [0, 1, 2]], [2]]
+```
 Description:
 ```
 [
