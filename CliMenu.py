@@ -38,7 +38,7 @@ class CliMenu:
 		
 		# 1st loop to manage go to previous menu
 		while not exitChoice:
-			# 2nd loop to manage go to current menu displayed
+			# 2nd loop to manage current menu displayed
 			while not exitChoice:
 				print("[ ] represents 'not selected'")
 				print("[*] represents 'selected'\n")
