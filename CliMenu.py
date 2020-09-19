@@ -1,9 +1,10 @@
 import sys
 
 class CliMenu:
-	def __init__(self, title = "", autoCommit = False, uniqueChoice = False, width = 50):
-		self.autoCommit = autoCommit
+	def __init__(self, title = "", noConfirmation = False, uniqueChoice = False, width = 50):
+		self.noConfirmation = noConfirmation
 		self.options = []
+		self.previousMenu = False
 		self.title = title
 		self.uniqueChoice = uniqueChoice
 		self.width = width
@@ -32,94 +33,117 @@ class CliMenu:
 	def printFooter(self):
 		print(self.footer)
 	
-	def printChooices(self):
+	def printChooices(self, isSubMenu = False):
 		exitChoice = False
 		
+		# 1st loop to manage go to previous menu
 		while not exitChoice:
-			print("[ ] represents 'not selected'")
-			print("[*] represents 'selected'\n")
-			print("Choose:")
-			print("\tq - Quit without execute action")
-			
-			if not self.autoCommit:
-				print("\tc to execute actions")
-			
-			if self.uniqueChoice:
-				print("\t<number> - To Select item (other choice will be unselected)")
-			else:
-				print("\t<number> - To Select/Unselect item")
-			
-			if not self.uniqueChoice:
-				print("\ta - Select all")
-				print("\tu - Unselect all")
-			
-			print("")
-			
-			for optionKey, option in enumerate(self.options):
-				selected = " "
+			# 2nd loop to manage go to current menu displayed
+			while not exitChoice:
+				print("[ ] represents 'not selected'")
+				print("[*] represents 'selected'\n")
+				print("Choose:")
 				
-				if option['selected']:
-					selected = "*"
+				if isSubMenu:
+					print("\tp - Previous menu")
 				
-				print("[" + selected + "] " + str(optionKey) + " - " + option['label'])
+				print("\tq - Quit without execute action")
 				
-			try:
-				choice = str(input("\nEnter your choice: ").lower()).strip()
-			except KeyboardInterrupt:
-				sys.exit(0)
-			
-			if choice == "c" and not self.autoCommit:
-				exitChoice = True
-			elif choice == "q":
-				exitChoice = True
-				self.unselectAllOptions()
-			elif choice == "a" and not self.uniqueChoice:
-				self.selectAllOptions()
+				if not self.noConfirmation:
+					print("\tc to execute actions")
 				
-				if self.autoCommit:
-					exitChoice = True
-			elif choice == "u" and not self.uniqueChoice:
-				self.unselectAllOptions()
+				if self.uniqueChoice:
+					print("\t<number> - To Select item (other choice will be unselected)")
+				else:
+					print("\t<number> - To Select/Unselect item")
 				
-				if self.autoCommit:
-					exitChoice = True
-			else:
-				choiceNr = -1
+				if not self.uniqueChoice:
+					print("\ta - Select all")
+					print("\tu - Unselect all")
 				
-				try:
-					choiceNr = int(choice)
+				print("")
+				
+				for optionKey, option in enumerate(self.options):
+					selected = " "
 					
-					if choiceNr >= 0 and choiceNr < len(self.options):
-						if self.uniqueChoice:
-							self.unselectAllOptions()
-							self.selectOption(choiceNr)
-						else:
-							self.switchSelectOption(choiceNr)
+					if option['selected']:
+						selected = "*"
+					
+					print("[" + selected + "] " + str(optionKey) + " - " + option['label'])
+					
+				try:
+					choice = str(input("\nEnter your choice: ").lower()).strip()
+				except KeyboardInterrupt:
+					sys.exit(0)
+				
+				if choice == "c" and not self.noConfirmation:
+					exitChoice = True
+				elif choice == "p" and isSubMenu:
+					exitChoice = True
+					self.unselectAllOptions()
+					self.setPreviousMenu(True)
+				elif choice == "q":
+					exitChoice = True
+					self.unselectAllOptions()
+				elif choice == "a" and not self.uniqueChoice:
+					self.selectAllOptions()
+					
+					if self.noConfirmation:
+						exitChoice = True
+				elif choice == "u" and not self.uniqueChoice:
+					self.unselectAllOptions()
+					
+					if self.noConfirmation:
+						exitChoice = True
+				else:
+					choiceNr = -1
+					
+					try:
+						choiceNr = int(choice)
 						
-						if self.autoCommit:
-							exitChoice = True
-					else:
-						print("Please select a number between 0 and " + str(len(self.options) - 1))
-				except Exception:
-					print("Please enter a valid entry")
-					pass
+						if choiceNr >= 0 and choiceNr < len(self.options):
+							if self.uniqueChoice:
+								self.unselectAllOptions()
+								self.selectOption(choiceNr)
+							else:
+								self.switchSelectOption(choiceNr)
+							
+							if self.noConfirmation:
+								exitChoice = True
+						else:
+							print("Please select a number between 0 and " + str(len(self.options) - 1))
+					except Exception:
+						print("Please enter a valid entry")
+						pass
+				
+				print("")
 			
-			print("")
-		
-		for optionSelected in self.getSelected():
-			if isinstance(optionSelected['subMenu'], self.__class__):
-				optionSelected['subMenu'].printMenu()
+			for optionSelected in self.getSelected():
+				if isinstance(optionSelected['subMenu'], self.__class__):
+					optionSelected['subMenu'].printMenu(isSubMenu = True)
+					
+					if optionSelected['subMenu'].getPreviousMenu():
+						optionSelected['subMenu'].setPreviousMenu(False)
+						exitChoice = False
 	
-	def printMenu(self):
+	def printMenu(self, isSubMenu = False):
 		self.printHeader()
-		self.printChooices()
+		self.printChooices(isSubMenu)
 		self.printFooter()
 	
-	def getAutoCommit(self):
-		return self.autoCommit
+	def getNoConfirmation(self):
+		return self.noConfirmation
 	
-	def setAutoCommit(self, autoCommit):
-		self.autoCommit = autoCommit
+	def setNoConfirmation(self, noConfirmation):
+		self.noConfirmation = noConfirmation
+		
+		return self
+	
+	def getPreviousMenu(self):
+		return self.previousMenu
+	
+	def setPreviousMenu(self, previousMenu):
+		self.previousMenu = previousMenu
 		
 		return self
 	
@@ -246,6 +270,30 @@ class CliMenu:
 					subSelected = [ optionKey, option['subMenu'].getSelectedIndex() ]
 				else:
 					subSelected = [ optionKey ]
+				
+				selected.append(subSelected)
+		
+		return selected
+	
+	def getSelectedLabel(self):
+		selected = []
+		
+		for option in self.options:
+			if option['selected']:
+				selected.append(option['label'])
+		
+		return selected
+	
+	def getSelectedLabels(self):
+		selected = []
+		subSelected = []
+		
+		for option in self.options:
+			if option['selected']:
+				if isinstance(option['subMenu'], self.__class__):
+					subSelected = [ option['label'], option['subMenu'].getSelectedLabel() ]
+				else:
+					subSelected = [ option['label'] ]
 				
 				selected.append(subSelected)
 		
