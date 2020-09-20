@@ -55,7 +55,7 @@ mainMenu.printMenu()
 print(mainMenu.getSelectedIndex())
 ```
 
-### Example 3 - Simple menu with auto. commit (no confirmation). But without confirmation
+### Example 3 - Simple menu with no confirmation But without confirmation
 It works similarly to unique choice if select a specific entry.
 
 But we can choose all options.
@@ -65,7 +65,7 @@ To disable all options possible add option: uniqueChoice = True
 import sys
 from CliMenu import CliMenu
 
-mainMenu = CliMenu(title = "Simple menu auto. commit", autoCommit = True)
+mainMenu = CliMenu(title = "Simple menu no confirmation", noConfirmation = True)
 mainMenu.addOption(label = "Entry 1")
 mainMenu.addOption(label = "Entry 2")
 mainMenu.addOption(label = "Entry 3")
