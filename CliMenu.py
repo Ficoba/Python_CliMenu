@@ -3,6 +3,7 @@ import sys
 class CliMenu:
 	def __init__(self, title = "", noConfirmation = False, uniqueChoice = False, width = 50):
 		self.noConfirmation = noConfirmation
+		self.quit = False
 		self.options = []
 		self.previousMenu = False
 		self.title = title
@@ -85,6 +86,7 @@ class CliMenu:
 				elif choice == "q":
 					exitChoice = True
 					self.unselectAllOptions()
+					self.setQuit(True)
 				elif choice == "a" and not self.uniqueChoice:
 					self.selectAllOptions()
 					
@@ -125,6 +127,10 @@ class CliMenu:
 					if optionSelected['subMenu'].getPreviousMenu():
 						optionSelected['subMenu'].setPreviousMenu(False)
 						exitChoice = False
+					
+					if optionSelected['subMenu'].getQuit():
+						self.unselectAllOptions()
+						self.setQuit(True)
 	
 	def printMenu(self, isSubMenu = False):
 		self.printHeader()
@@ -173,6 +179,14 @@ class CliMenu:
 	
 	#
 	## Options methods
+	def getQuit(self):
+		return self.quit
+	
+	def setQuit(self, quit):
+		self.quit = quit
+		
+		return self
+	
 	def getOption(self, index):
 		return self.options[index]
 	
