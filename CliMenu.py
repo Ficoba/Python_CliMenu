@@ -1,5 +1,3 @@
-import sys
-
 class CliMenu:
 	def __init__(self, title = "", noConfirmation = False, uniqueChoice = False, width = 50):
 		self.noConfirmation = noConfirmation
@@ -36,6 +34,7 @@ class CliMenu:
 	
 	def printChooices(self, isSubMenu = False):
 		exitChoice = False
+		confirmationDisplayed = False
 		
 		# 1st loop to manage go to previous menu
 		while not exitChoice:
@@ -50,7 +49,8 @@ class CliMenu:
 				
 				print("\tq - Quit without execute action")
 				
-				if not self.noConfirmation:
+				if not self.noConfirmation or not self.uniqueChoice:
+					confirmationDisplayed = True
 					print("\tc to execute actions")
 				
 				if self.uniqueChoice:
@@ -77,7 +77,7 @@ class CliMenu:
 				except KeyboardInterrupt:
 					sys.exit(0)
 				
-				if choice == "c" and not self.noConfirmation:
+				if choice == "c" and confirmationDisplayed:
 					exitChoice = True
 				elif choice == "p" and isSubMenu:
 					exitChoice = True
@@ -90,33 +90,36 @@ class CliMenu:
 				elif choice == "a" and not self.uniqueChoice:
 					self.selectAllOptions()
 					
-					if self.noConfirmation:
+					if not confirmationDisplayed:
 						exitChoice = True
 				elif choice == "u" and not self.uniqueChoice:
 					self.unselectAllOptions()
 					
-					if self.noConfirmation:
+					if not confirmationDisplayed:
 						exitChoice = True
 				else:
 					choiceNr = -1
 					
-					try:
-						choiceNr = int(choice)
-						
-						if choiceNr >= 0 and choiceNr < len(self.options):
-							if self.uniqueChoice:
-								self.unselectAllOptions()
-								self.selectOption(choiceNr)
-							else:
-								self.switchSelectOption(choiceNr)
+					if choice == "" and not confirmationDisplayed and self.hasSelected():
+						exitChoice = True
+					else:
+						try:
+							choiceNr = int(choice)
 							
-							if self.noConfirmation:
-								exitChoice = True
-						else:
-							print("Please select a number between 0 and " + str(len(self.options) - 1))
-					except Exception:
-						print("Please enter a valid entry")
-						pass
+							if choiceNr >= 0 and choiceNr < len(self.options):
+								if self.uniqueChoice:
+									self.unselectAllOptions()
+									self.selectOption(choiceNr)
+								else:
+									self.switchSelectOption(choiceNr)
+								
+								if not confirmationDisplayed:
+									exitChoice = True
+							else:
+								print("Please select a number between 0 and " + str(len(self.options) - 1))
+						except Exception:
+							print("Please enter a valid entry")
+							pass
 				
 				print("")
 			
@@ -255,6 +258,13 @@ class CliMenu:
 		del self.options[index]
 		
 		return self
+	
+	def hasSelected(self):
+		for option in self.options:
+			if option['selected']:
+				return True
+		
+		return False
 	
 	def getSelected(self):
 		selected = []
